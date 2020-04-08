@@ -1,5 +1,9 @@
 package com.allendowney.thinkdast;
 
+import org.apache.commons.math3.exception.OutOfRangeException;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -44,8 +48,14 @@ public class MyArrayList<T> implements List<T> {
 
 	@Override
 	public boolean add(T element) {
-		// TODO: FILL THIS IN!
-		return false;
+		if (size >= array.length) {
+			T[] newArray = (T[]) new Object[array.length * 2];
+			System.arraycopy(array, 0, newArray, 0, array.length);
+			array = newArray;
+		}
+			array[size] = element;
+			size++;
+			return true;
 	}
 
 	@Override
@@ -80,8 +90,7 @@ public class MyArrayList<T> implements List<T> {
 
 	@Override
 	public void clear() {
-		// note: this version does not actually null out the references
-		// in the array, so it might delay garbage collection.
+		array = (T[]) new Object[10];
 		size = 0;
 	}
 
@@ -110,7 +119,10 @@ public class MyArrayList<T> implements List<T> {
 
 	@Override
 	public int indexOf(Object target) {
-		// TODO: FILL THIS IN!
+		for (int i = 0; i < size; i++) {
+			if (array[i] == null ? target == null : array[i].equals(target))
+				return i;
+		}
 		return -1;
 	}
 
@@ -119,7 +131,7 @@ public class MyArrayList<T> implements List<T> {
 	 * Handles the special case that the target is null.
 	 *
 	 * @param target
-	 * @param object
+	 * //@param object
 	 */
 	private boolean equals(Object target, Object element) {
 		if (target == null) {
@@ -179,10 +191,17 @@ public class MyArrayList<T> implements List<T> {
 		return true;
 	}
 
-	@Override
+	@Override @Test
 	public T remove(int index) {
-		// TODO: FILL THIS IN!
-		return null;
+		if (index >= size || index < 0){
+			throw new IndexOutOfBoundsException();
+		}
+		T old = array[index];
+		for (int i = index; i < size - 1; i++) {
+			array[index] = array[index + 1];
+		}
+		size--;
+		return old;
 	}
 
 	@Override
@@ -191,6 +210,7 @@ public class MyArrayList<T> implements List<T> {
 		for (Object obj: collection) {
 			flag &= remove(obj);
 		}
+		size = 0;
 		return flag;
 	}
 
@@ -201,8 +221,12 @@ public class MyArrayList<T> implements List<T> {
 
 	@Override
 	public T set(int index, T element) {
-		// TODO: FILL THIS IN!
-		return null;
+		if (index < 0 || index >= size){
+			throw new IndexOutOfBoundsException();
+		}
+		T old = array[index];
+		array[index] = element;
+		return old;
 	}
 
 	@Override
