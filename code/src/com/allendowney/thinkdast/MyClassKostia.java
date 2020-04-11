@@ -21,10 +21,8 @@ public class MyClassKostia {
         Element element = document.getElementById("mw-content-text");
         Elements paragrarhs = element.select("p");
 
+        Element para = paragrarhs.get(1);
 
-        Element para = paragrarhs.get(0);
-
-        System.out.println(para);
         Iterable<Node> iter = new WikiNodeIterable(para);
         for(Node node : iter){
             if (node instanceof TextNode)

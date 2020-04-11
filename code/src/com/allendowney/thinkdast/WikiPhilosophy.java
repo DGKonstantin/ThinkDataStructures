@@ -2,9 +2,15 @@ package com.allendowney.thinkdast;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
 public class WikiPhilosophy {
@@ -40,6 +46,36 @@ public class WikiPhilosophy {
      * @throws IOException
      */
     public static void testConjecture(String destination, String source, int limit) throws IOException {
-        // TODO: FILL THIS IN!
+        WikiFetcher wikiFetcher = new WikiFetcher();
+        boolean isFirstLink = false;
+        Connection conn = Jsoup.connect(source);
+        Document doc = conn.get();
+        Element content = doc.getElementById("mw-content-text");
+
+        Elements elements = content.select("p");
+
+        for (Element element : elements){
+            Iterable<Node> iterable = new WikiNodeIterable(element);
+            Iterator<Node> iterator = iterable.iterator();
+
+            while (iterator.hasNext()){
+                Node node = iterator.next();
+                if (node.hasAttr("href")){
+                    System.out.println(node.absUrl("href"));
+                    isFirstLink = true;
+                    break;
+                }
+            }
+            if (isFirstLink) break;
+        }
+    }
+
+    private static void recursiveDFS(Node node) {
+        //if (node instanceof TextNode) {
+            System.out.print(node);
+        //}
+        for (Node child: node.childNodes()) {
+            recursiveDFS(child);
+        }
     }
 }
