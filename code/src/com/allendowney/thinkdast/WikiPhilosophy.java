@@ -46,13 +46,30 @@ public class WikiPhilosophy {
      * @throws IOException
      */
     public static void testConjecture(String destination, String source, int limit) throws IOException {
-        WikiFetcher wikiFetcher = new WikiFetcher();
-        boolean isFirstLink = false;
+        if (limit == 0) {
+            System.out.println("Out of limit iteration");
+            return;
+        }
+        if (source.equals(destination)) {
+            System.out.println("Finished with " + limit + " iteration");
+            return;
+        }
+        String url = getFirstLink(source);
+        testConjecture(destination, url, limit--);
+    }
+
+    private static String getFirstLink(String source) throws IOException {
         Connection conn = Jsoup.connect(source);
         Document doc = conn.get();
         Element content = doc.getElementById("mw-content-text");
+        String newSurce;
+        if ((newSurce = getFirstLinkBySelect(content, "p")) != null) {
+            return newSurce;
+        }else return getFirstLinkBySelect(content, "ul");
+    }
 
-        Elements elements = content.select("p");
+    private static String getFirstLinkBySelect(Element content, String cssQuery){
+        Elements elements = content.select(cssQuery);
 
         for (Element element : elements){
             Iterable<Node> iterable = new WikiNodeIterable(element);
@@ -62,12 +79,11 @@ public class WikiPhilosophy {
                 Node node = iterator.next();
                 if (node.hasAttr("href")){
                     System.out.println(node.absUrl("href"));
-                    isFirstLink = true;
-                    break;
+                    return node.absUrl("href");
                 }
             }
-            if (isFirstLink) break;
         }
+        return null;
     }
 
     private static void recursiveDFS(Node node) {
