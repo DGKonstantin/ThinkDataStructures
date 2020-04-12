@@ -31,11 +31,14 @@ public class WikiPhilosophy {
      * @param args
      * @throws IOException
      */
-    public static void main(String[] args) throws IOException {
-        String destination = "https://en.wikipedia.org/wiki/Philosophy";
-        String source = "https://en.wikipedia.org/wiki/Java_(programming_language)";
 
-        testConjecture(destination, source, 10);
+    private static int staticLimit = 13;
+
+    public static void main(String[] args) throws IOException {
+        String destination = "https://ru.wikipedia.org/wiki/%D0%A4%D0%B8%D0%BB%D0%BE%D1%81%D0%BE%D1%84%D0%B8%D1%8F";
+        String source = "https://ru.wikipedia.org/wiki/%D0%90%D0%BD%D0%BD%D0%B8%D0%B3%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D1%8F";
+
+        testConjecture(destination, source, new ArrayList<String>(), staticLimit);
     }
 
     /**
@@ -45,53 +48,72 @@ public class WikiPhilosophy {
      * @param source
      * @throws IOException
      */
-    public static void testConjecture(String destination, String source, int limit) throws IOException {
-        if (limit == 0) {
+    public static void testConjecture(String destination, String source, ArrayList<String> list, int limit) throws IOException {
+        int iteration = staticLimit - limit;
+        if (limit < 0) {
             System.out.println("Out of limit iteration");
             return;
         }
-        if (source.equals(destination)) {
-            System.out.println("Finished with " + limit + " iteration");
+        if (destination.equals(source)) {
+            System.out.println("Finished with " + iteration + " iteration");
             return;
         }
-        String url = getFirstLink(source);
-        testConjecture(destination, url, limit--);
+        if (source.equals("sorry")){
+            System.out.println("Sorry, no links");
+            return;
+        }
+        String url = getFirstLink(source, list);
+        list.add(source);
+        testConjecture(destination, url, list, --limit);
     }
 
-    private static String getFirstLink(String source) throws IOException {
+    private static String getFirstLink(String source, ArrayList<String> list) throws IOException {
         Connection conn = Jsoup.connect(source);
         Document doc = conn.get();
         Element content = doc.getElementById("mw-content-text");
-        String newSurce;
-        if ((newSurce = getFirstLinkBySelect(content, "p")) != null) {
-            return newSurce;
-        }else return getFirstLinkBySelect(content, "ul");
+        String newSurce = getFirstLinkBySelect(content, "p", list);
+        if (newSurce == null) newSurce = getFirstLinkBySelect(content, "ul", list);
+        if (newSurce == null) return "sorry";
+        else return newSurce;
     }
 
-    private static String getFirstLinkBySelect(Element content, String cssQuery){
-        Elements elements = content.select(cssQuery);
+    private static String getFirstLinkBySelect(Element content, String query, ArrayList<String> list){
+            Elements elements = content.select(query);
 
-        for (Element element : elements){
-            Iterable<Node> iterable = new WikiNodeIterable(element);
-            Iterator<Node> iterator = iterable.iterator();
+            for(Node node : elements){
 
-            while (iterator.hasNext()){
-                Node node = iterator.next();
-                if (node.hasAttr("href")){
-                    System.out.println(node.absUrl("href"));
-                    return node.absUrl("href");
+                Iterable<Node> iterable = new WikiNodeIterable(node);
+                Iterator<Node> iterator = iterable.iterator();
+
+                while (iterator.hasNext()){
+                    node = iterator.next();
+                    boolean isLink = node.nodeName().equals("a");
+                    boolean isWiki = node.absUrl("href").contains("wikipedia.org");
+                    boolean isRef = node.attr("href").contains("#");
+                    boolean isCursive = node.parent().attr("class").equals("IPA nopopups noexcerpt");
+                    boolean isRepeat = list.contains(node.absUrl("href"));
+                    if(isLink && isWiki && !isRef && !isCursive && !isRepeat){
+                        System.out.println(node.absUrl("href"));
+                        return node.absUrl("href");
+                    }
                 }
             }
-        }
         return null;
     }
 
     private static void recursiveDFS(Node node) {
-        //if (node instanceof TextNode) {
-            System.out.print(node);
-        //}
-        for (Node child: node.childNodes()) {
+        boolean isCursive = node.nodeName().equals("i");
+        boolean isRed = node.nodeName().equals("span");
+        boolean isLink = node.nodeName().equals("a");
+        boolean isWiki = node.absUrl("href").contains("wikipedia.org");
+        if (!isCursive && !isRed){
+            if (isLink && isWiki){
+                System.out.println(node.absUrl("href"));
+                return;
+            }
+            for (Node child: node.childNodes()) {
             recursiveDFS(child);
+            }
         }
     }
 }
