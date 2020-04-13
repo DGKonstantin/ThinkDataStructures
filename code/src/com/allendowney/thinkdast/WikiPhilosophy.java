@@ -32,11 +32,11 @@ public class WikiPhilosophy {
      * @throws IOException
      */
 
-    private static int staticLimit = 13;
+    private static int staticLimit = 30;
 
     public static void main(String[] args) throws IOException {
-        String destination = "https://ru.wikipedia.org/wiki/%D0%A4%D0%B8%D0%BB%D0%BE%D1%81%D0%BE%D1%84%D0%B8%D1%8F";
-        String source = "https://ru.wikipedia.org/wiki/%D0%90%D0%BD%D0%BD%D0%B8%D0%B3%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D1%8F";
+        String destination = "https://en.wikipedia.org/wiki/Philosophy";
+        String source = "https://en.wikipedia.org/wiki/Cumberland,_Maryland";
 
         testConjecture(destination, source, new ArrayList<String>(), staticLimit);
     }
@@ -85,14 +85,22 @@ public class WikiPhilosophy {
                 Iterable<Node> iterable = new WikiNodeIterable(node);
                 Iterator<Node> iterator = iterable.iterator();
 
+                boolean isQuotes = false;
+
                 while (iterator.hasNext()){
                     node = iterator.next();
                     boolean isLink = node.nodeName().equals("a");
                     boolean isWiki = node.absUrl("href").contains("wikipedia.org");
                     boolean isRef = node.attr("href").contains("#");
-                    boolean isCursive = node.parent().attr("class").equals("IPA nopopups noexcerpt");
+                    //boolean isCursive = node.parent().attr("class").equals("IPA nopopups noexcerpt") || node.attr("class").equals("IPA nopopups noexcerpt");
+                    boolean isCursive = node.parent().nodeName().equals("span");
+                    boolean isSmall = node.parent().nodeName().equals("small");
                     boolean isRepeat = list.contains(node.absUrl("href"));
-                    if(isLink && isWiki && !isRef && !isCursive && !isRepeat){
+                    if (node instanceof TextNode){
+                        if (((TextNode) node).getWholeText().contains("(")) isQuotes = true;
+                        if (((TextNode) node).getWholeText().contains(")")) isQuotes = false;
+                    }
+                    if(isLink && isWiki && !isRef && !isCursive && !isRepeat && !isSmall && !isQuotes){
                         System.out.println(node.absUrl("href"));
                         return node.absUrl("href");
                     }
