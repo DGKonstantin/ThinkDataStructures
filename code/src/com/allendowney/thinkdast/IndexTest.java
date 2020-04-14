@@ -42,6 +42,8 @@ public class IndexTest {
 			assertThat(tc.get("occur"), is(2));
 			assertThat(tc.get("not there"), is(0));
 		}
+
+
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 /**
@@ -63,6 +64,22 @@ public class Index {
         }
     }
 
+    public void printIndex(String myTerm) {
+        // loop through the search terms
+        for (String term: keySet()) {
+            Set<TermCounter> tcs = get(term);
+            if (term.equals(myTerm)){
+                System.out.println(term + ":\n");
+                for (TermCounter tc: tcs) {
+                    Integer count = tc.get(term);
+                    System.out.println("    " + tc.getLabel() + " " + count);
+                }
+            }
+        }
+    }
+
+
+
     /**
      * Returns the set of terms that have been indexed.
      *
@@ -79,8 +96,11 @@ public class Index {
      * @param paragraphs  Collection of elements that should be indexed.
      */
     public void indexPage(String url, Elements paragraphs) {
-        // TODO: Your code here
-
+        TermCounter tc = new TermCounter(url);
+        tc.processElements(paragraphs);
+        for (String term : tc.keySet()){
+            add(term, tc);
+        }
         // make a TermCounter and count the terms in the paragraphs
 
         // for each term in the TermCounter, add the TermCounter to the index
@@ -103,6 +123,14 @@ public class Index {
         paragraphs = wf.fetchWikipedia(url);
         indexer.indexPage(url, paragraphs);
 
-        indexer.printIndex();
+        indexer.printIndex("occur");
+
+        Set<TermCounter> set = indexer.get("occur");
+        System.out.println(set.size());
+        for (TermCounter tc : set){
+            System.out.println(tc.size());
+            System.out.println(tc.get("occur"));
+            System.out.println(tc.get("not there"));
+        }
     }
 }
