@@ -3,6 +3,8 @@
  */
 package com.allendowney.thinkdast;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +42,9 @@ public class MyHashMap<K, V> extends MyBetterMap<K, V> implements Map<K, V> {
 	 *
 	 */
 	protected void rehash() {
-		// TODO: FILL THIS IN!
+		List<MyLinearMap<K, V>> mapsCopy = new ArrayList<>(maps);
+		makeMaps(maps.size() * 2);
+		maps.addAll(mapsCopy);
 	}
 
 	/**

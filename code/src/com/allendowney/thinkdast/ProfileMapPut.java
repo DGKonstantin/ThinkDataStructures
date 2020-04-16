@@ -13,15 +13,17 @@ public class ProfileMapPut {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		//profileHashMapPut();
-		//profileMyHashMapPut();
-		profileMyFixedHashMapPut();
+		int startN = 16000;
+		int endMillis = 8000;
+		//profileHashMapPut(startN, endMillis);
+		//profileMyHashMapPut(startN, endMillis);
+		profileMyFixedHashMapPut(startN, endMillis);
 	}
 
 	/**
 	 * Characterize the run time of putting a key in java.util.HashMap
 	 */
-	public static void profileHashMapPut() {
+	public static void profileHashMapPut(int startN, int endMillis) {
 		Timeable timeable = new Timeable() {
 			Map<String, Integer> map;
 
@@ -35,15 +37,13 @@ public class ProfileMapPut {
 				}
 			}
 		};
-		int startN = 8000;
-		int endMillis = 1000;
 		runProfiler("HashMap put", timeable, startN, endMillis);
 	}
 	
 	/**
 	 * Characterize the run time of putting a key in MyHashMap
 	 */
-	public static void profileMyHashMapPut() {
+	public static void profileMyHashMapPut(int startN, int endMillis) {
 		Timeable timeable = new Timeable() {
 			Map<String, Integer> map;
 
@@ -57,8 +57,6 @@ public class ProfileMapPut {
 				}
 			}
 		};
-		int startN = 1000;
-		int endMillis = 5000;
 		runProfiler("MyHashMap put", timeable, startN, endMillis);
 	}
 	
@@ -66,7 +64,7 @@ public class ProfileMapPut {
 	/**
 	 * Characterize the run time of putting a key in MyFixedHashMap
 	 */
-	public static void profileMyFixedHashMapPut() {
+	public static void profileMyFixedHashMapPut(int startN, int endMillis) {
 		Timeable timeable = new Timeable() {
 			Map<String, Integer> map;
 
@@ -80,8 +78,6 @@ public class ProfileMapPut {
 				}
 			}
 		};
-		int startN = 8000;
-		int endMillis = 1000;
 		runProfiler("MyFixedHashMap put", timeable, startN, endMillis);
 	}
 	

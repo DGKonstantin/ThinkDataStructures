@@ -125,7 +125,7 @@ public class MyBetterMap<K, V> implements Map<K, V> {
 	public int size() {
 		// add up the sizes of the sub-maps
 		int total = 0;
-		for (MyLinearMap<K, V> map: maps) {
+		for (MyLinearMap<K, V> map : maps) {
 			total += map.size();
 		}
 		return total;
