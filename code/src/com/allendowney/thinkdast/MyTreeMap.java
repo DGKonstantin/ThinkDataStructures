@@ -70,9 +70,30 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		// something to make the compiler happy
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> k = (Comparable<? super K>) target;
-
-		// TODO: FILL THIS IN!
-		return null;
+		if(root == null) return null;
+		Node node = root;
+		while (true){
+			try{
+				System.out.println(target
+						+ " node.key:" + node.key
+						+ " node.right.key:" + node.right.key
+						+ " node.left.key:" + node.left.key);
+			}catch (Exception e){
+				System.out.println("Exception");
+			}
+			if (k.compareTo(node.key) == 0) return node;
+			else if (node.left == null && node.right == null) {
+				System.out.println("no T & L node.key = " + node.key);
+				return null;
+			}
+			else if (node.left != null && k.compareTo(node.left.key) <= 0) node = node.left;
+			else if (node.right != null && k.compareTo(node.right.key) >= 0) node = node.right;
+			else if (node.right != null && k.compareTo(node.right.key) <= 0) node = node.left;
+			else {
+				System.out.println("other");
+				return null;
+			}
+		}
 	}
 
 	/**
