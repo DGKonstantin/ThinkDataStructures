@@ -184,9 +184,33 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public V remove(Object key) {
-		// OPTIONAL TODO: FILL THIS IN!
-		throw new UnsupportedOperationException();
+		Node node = findNode(key);
+		if (node == null) return null;
+		V value = node.value;
+		ArrayList<K> list = new ArrayList<K>();
+		list.addAll(keySet());
+		list.remove((K) key);
+		Node rootNew = root;
+		clear();
+		while (!list.isEmpty()){
+			Node temp = rootNew;
+			K keyOfList = list.get(list.size() / 2);
+			Comparable<? super K> k = (Comparable<? super K>) keyOfList;
+			while (temp != null){
+				int cmp = k.compareTo(temp.key);
+				if (cmp < 0) temp = temp.left;
+				else if (cmp > 0) temp = temp.right;
+				else {
+					put(keyOfList, temp.value);
+					break;
+				};
+			}
+			list.remove(keyOfList);
+		}
+		return value;
 	}
+
+
 
 	@Override
 	public int size() {

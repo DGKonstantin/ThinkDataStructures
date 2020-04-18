@@ -167,7 +167,34 @@ public class MyTreeMapTest {
 	 */
 	@Test
 	public void testRemove() {
-		// nothing to test, since this method is not implemented
+		Set<String> keySet = map.keySet();
+		assertThat(keySet.size(), is(9));
+		assertThat(keySet.contains("03"), is(true));
+		assertThat(keySet.contains("05"), is(false));
+
+		List<String> list = new ArrayList<String>();
+		list.addAll(keySet);
+
+		// check that the keys are in ascending order
+//		for (int i=0; i<list.size()-1; i++) {
+//			System.out.println(list.get(i));
+//			if (list.get(i).compareTo(list.get(i+1)) > 0) {
+//				assert(false);
+//			}
+//		}
+		map.remove("04");
+		map.remove("01");
+		map.remove("01");
+		keySet = map.keySet();
+		list.clear();
+		list.addAll(keySet);
+		assertThat(keySet.size(), is(7));
+		for (int i=0; i<list.size()-1; i++) {
+			System.out.println(list.get(i));
+			if (list.get(i).compareTo(list.get(i+1)) > 0) {
+				assert(false);
+			}
+		}
 	}
 
 	/**
