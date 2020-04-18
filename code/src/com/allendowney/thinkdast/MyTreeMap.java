@@ -64,15 +64,14 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		// something to make the compiler happy
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> k = (Comparable<? super K>) target;
-		if(root == null) return null;
 		Node node = root;
-		while (true){
-			if (k.compareTo(node.key) == 0) return node;
-			else if (node.left == null && node.right == null) return null;
-			else if (node.left != null && k.compareTo(node.key) <= 0) node = node.left;
-			else if (node.right != null && k.compareTo(node.key) >= 0) node = node.right;
-			else return null;
+		while (node != null){
+		    int cmp = k.compareTo(node.key);
+			if (cmp < 0) node = node.left;
+			else if (cmp > 0) node = node.right;
+			else return node;
 		}
+		return null;
 	}
 
 	/**
@@ -128,21 +127,15 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	@Override
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
-		linkedHashSet = new LinkedHashSet<>();
-		inorder(root);
-		set = linkedHashSet;
-		linkedHashSet = null;
+		inorder(root, set);
 		return set;
 	}
-	private Set<K> linkedHashSet = null;
-	private void inorder(Node node){
+
+	private void inorder(Node node, Set<K> set){
 		if (node == null) return;
-		inorder(node.left);
-		visit(node);
-		inorder(node.right);
-	}
-	private void visit(Node node){
-		linkedHashSet.add(node.key);
+		inorder(node.left, set);
+		set.add(node.key);
+		inorder(node.right, set);
 	}
 
 
@@ -160,26 +153,26 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	}
 
 	private V putHelper(Node node, K key, V value) {
+        Comparable<? super K> k = (Comparable<? super K>) key;
+        int cmp = k.compareTo(node.key);
+        if (cmp < 0){
+            if (node.left == null){
+                node.left = new Node(key, value);
+                size++;
+                return null;
+            }
+            else return putHelper(node.left, key, value);
+        }else if (cmp > 0){
+            if (node.right == null){
+                node.right = new Node(key, value);
+                size++;
+                return null;
+            }
+            else return putHelper(node.right, key, value);
+        }
 		Node oldNode = findNode(key);
-		if (oldNode != null) {
-			node = oldNode;
-			node.value = value;
-			return oldNode.value;
-		}
-		else{
-			Comparable<? super K> k = (Comparable<? super K>) key;
-			while (true){
-				if (node.left == null && node.right == null) {
-					if (k.compareTo(node.key) > 0) node.right = new Node(key, value);
-					else node.left = new Node(key, value);
-					size++;
-					return value;
-				}
-				else if (node.left != null && k.compareTo(node.key) < 0) node = node.left;
-				else if (node.right != null && k.compareTo(node.key) > 0) node = node.right;
-				else return value;
-			}
-		}
+        node.value = value;
+        return oldNode.value;
 	}
 
 	@Override
