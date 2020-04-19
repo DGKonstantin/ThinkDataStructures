@@ -25,7 +25,7 @@ public class JedisMaker {
 		
 		// assemble the directory name
 		String slash = File.separator;
-		String filename = "resources" + slash + "redis_url.txt";
+		String filename = "resources" + slash + "redis_url.gitignore";
 		URL fileURL = JedisMaker.class.getClassLoader().getResource(filename);
 		String filepath = URLDecoder.decode(fileURL.getFile(), "UTF-8");
 		
@@ -87,11 +87,11 @@ public class JedisMaker {
 	private static void printInstructions() {
 		System.out.println("");
 		System.out.println("To connect to RedisToGo, you have to provide a file called");
-		System.out.println("redis_url.txt that contains the URL of your Redis server.");
+		System.out.println("redis_url.gitignore that contains the URL of your Redis server.");
 		System.out.println("If you select an instance on the RedisToGo web page,");
 		System.out.println("you should see a URL that contains the information you need:");
 		System.out.println("redis://redistogo:AUTH@HOST:PORT");
-		System.out.println("Create a file called redis_url.txt in the src/resources");
+		System.out.println("Create a file called redis_url.gitignore in the src/resources");
 		System.out.println("directory, and paste in the URL.");
 	}
 
