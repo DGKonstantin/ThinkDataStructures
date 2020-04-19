@@ -69,11 +69,12 @@ public class Index {
         for (String term: keySet()) {
             Set<TermCounter> tcs = get(term);
             if (term.equals(myTerm)){
-                System.out.println(term + ":\n");
+                System.out.println(term);
                 for (TermCounter tc: tcs) {
                     Integer count = tc.get(term);
                     System.out.println("    " + tc.getLabel() + " " + count);
                 }
+                System.out.println();
             }
         }
     }
@@ -124,13 +125,6 @@ public class Index {
         indexer.indexPage(url, paragraphs);
 
         indexer.printIndex("occur");
-
-        Set<TermCounter> set = indexer.get("occur");
-        System.out.println(set.size());
-        for (TermCounter tc : set){
-            System.out.println(tc.size());
-            System.out.println(tc.get("occur"));
-            System.out.println(tc.get("not there"));
-        }
+        indexer.printIndex("the");
     }
 }

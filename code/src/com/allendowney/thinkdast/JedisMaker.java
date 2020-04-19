@@ -9,6 +9,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import redis.clients.jedis.Jedis;
 
@@ -63,6 +65,7 @@ public class JedisMaker {
 
 		String[] array = uri.getAuthority().split("[:@]");
 		String auth = array[1];
+		//System.out.printf("host: %s, port: %d, auth: %s", host, port, auth);
 		
 		// connect to the server
 		Jedis jedis = new Jedis(host, port);
@@ -104,23 +107,28 @@ public class JedisMaker {
 
 		Jedis jedis = make();
 
-		// String
-		jedis.set("mykey", "myvalue");
+
+//		// String
+//		jedis.set("mykey", "myvalue");
 		String value = jedis.get("mykey");
 	    System.out.println("Got value: " + value);
-
-	    // Set
-	    jedis.sadd("myset", "element1", "element2", "element3");
-	    System.out.println("element2 is member: " + jedis.sismember("myset", "element2"));
-
-	    // List
-	    jedis.rpush("mylist", "element1", "element2", "element3");
-	    System.out.println("element at index 1: " + jedis.lindex("mylist", 1));
-
-	    // Hash
-	    jedis.hset("myhash", "word1", Integer.toString(2));
-	    jedis.hincrBy("myhash", "word2", 1);
-	    System.out.println("frequency of word1: " + jedis.hget("myhash", "word1"));
+//
+//	    // Set
+//		jedis.srem("myset", "element1", "element2", "element3");
+//	    jedis.sadd("myset", "element1", "element2", "element3");
+//	    System.out.println("element2 is member: " + jedis.sismember("myset", "element2"));
+// 		jedis.srem("myset", "element1", "element2", "element3");
+//
+//	    // List
+//	    jedis.rpush("mylist", "element1", "element2", "element3");
+//	    System.out.println("element at index 1: " + jedis.lindex("mylist", 1));
+		jedis.rpop("mylist");
+//
+//	    // Hash
+//	    jedis.hset("myhash", "word1", Integer.toString(2));
+//	    jedis.hincrBy("myhash", "word2", 13000);
+//	    System.out.println("frequency of word1: " + jedis.hget("myhash", "word1"));
+		System.out.println(jedis.getDB());
 	    System.out.println("frequency of word2: " + jedis.hget("myhash", "word2"));
 
 	    jedis.close();

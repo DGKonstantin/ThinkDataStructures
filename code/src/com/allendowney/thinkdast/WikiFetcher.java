@@ -3,6 +3,7 @@ package com.allendowney.thinkdast;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 
 import org.jsoup.Connection;
@@ -54,7 +55,8 @@ public class WikiFetcher {
 
 		// read the file
 		InputStream stream = WikiFetcher.class.getClassLoader().getResourceAsStream(filename);
-		Document doc = Jsoup.parse(stream, "UTF-8", filename);
+		Connection conn = Jsoup.connect(url);
+		Document doc = conn.get();
 
 		// parse the contents of the file
 		Element content = doc.getElementById("mw-content-text");
