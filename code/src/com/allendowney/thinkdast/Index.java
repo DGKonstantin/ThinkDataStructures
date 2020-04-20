@@ -1,13 +1,11 @@
 package com.allendowney.thinkdast;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import redis.clients.jedis.Transaction;
 
 /**
  * Encapsulates a map from search term to set of TermCounter.
@@ -36,6 +34,8 @@ public class Index {
         // otherwise we can modify an existing Set
         set.add(tc);
     }
+
+
 
     /**
      * Looks up a search term and returns a set of TermCounters.

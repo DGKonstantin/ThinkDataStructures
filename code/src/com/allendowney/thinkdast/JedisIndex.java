@@ -65,6 +65,21 @@ public class JedisIndex {
         jedis.hincrBy(urlSetKey(term), termCounterKey(tc.getLabel()), tc.get(term));
     }
 
+    private List<Object> pushTermCounter(TermCounter tc){
+        Transaction t = jedis.multi();
+        String url = tc.getLabel();
+        String hashname = termCounterKey(url);
+
+        t.del(hashname);
+
+        for (String term : tc.keySet()){
+            Integer count = tc.get(term);
+            t.hset(hashname, term, count.toString());
+            t.sadd(urlSetKey(term), url);
+        }
+        return t.exec();
+    }
+
     /**
      * Looks up a search term and returns a set of URLs.
      *
@@ -72,7 +87,7 @@ public class JedisIndex {
      * @return Set of URLs.
      */
     public Set<String> getURLs(String term) {
-        return jedis.keys(urlSetKey(term));
+        return jedis.smembers(urlSetKey(term));
     }
 
     /**
@@ -82,11 +97,14 @@ public class JedisIndex {
      * @return Map from URL to count.
      */
     public Map<String, Integer> getCounts(String term) {
-        Map<String, String> stringStringMap = jedis.hgetAll(urlSetKey(term));
-        Map<String, Integer> stringIntegerMap = new HashMap<>();
-        for (String s : stringStringMap.keySet())
-            stringIntegerMap.put(s, Integer.valueOf(stringStringMap.get(s)));
-        return stringIntegerMap;
+        Map <String, Integer> map = new HashMap<>();
+        Set<String> urls = getURLs(term);
+        Integer count;
+        for(String url : urls){
+            count = getCount(url, term);
+            map.put(url, count);
+        }
+        return map;
     }
 
     /**
@@ -97,16 +115,7 @@ public class JedisIndex {
      * @return
      */
     public Integer getCount(String url, String term) {
-        int count = 0;
-        Set<String> set = jedis.keys(urlSetKey(term));
-        for (String s : set) {
-            Set<String> set1 = jedis.hkeys(s);
-            for (String s1 : set1){
-                count += Integer.parseInt(jedis.hget(s, s1));
-            }
-            return count;
-        }
-        return count;
+        return Integer.valueOf(jedis.hget(termCounterKey(url), term));
     }
 
     /**
@@ -118,9 +127,7 @@ public class JedisIndex {
     public void indexPage(String url, Elements paragraphs) {
         TermCounter tc = new TermCounter(url);
         tc.processElements(paragraphs);
-        for (String s : tc.keySet()){
-            add(s, tc);
-        }
+        pushTermCounter(tc);
     }
 
     /**
@@ -128,18 +135,15 @@ public class JedisIndex {
      *
      * Should be used for development and testing, not production.
      */
-    public void printIndex(String myTerm) {
+    public void printIndex() {
         // loop through the search terms
-        for (String term: termSet()) {
-            if (term. equals(myTerm)){
-                System.out.println(term);
-
-                // for each term, print the pages where it appears
-                Set<String> urls = getURLs(term);
-                for (String url: urls) {
-                    Integer count = getCount(url, term);
-                    System.out.println("    " + url + " " + count);
-                }
+        for (String term : termSet()) {
+            System.out.println(term);
+            // for each term, print the pages where it appears
+            Set<String> urls = getURLs(term);
+            for (String url: urls) {
+                Integer count = getCount(url, term);
+                System.out.println("    " + url + " " + count);
             }
         }
     }
@@ -245,11 +249,11 @@ public class JedisIndex {
 
         //index.deleteTermCounters();
         //index.deleteURLSets();
-        index.deleteAllKeys();
-        loadIndex(index);
+        //index.deleteAllKeys();
+        //loadIndex(index);
 
 
-        index.printIndex("the");
+        //index.printIndex();
         Map<String, Integer> map = index.getCounts("the");
         for (Entry<String, Integer> entry: map.entrySet()) {
             System.out.println(entry.getKey() + "  " + entry.getValue());
@@ -272,5 +276,10 @@ public class JedisIndex {
         url = "https://en.wikipedia.org/wiki/Programming_language";
         paragraphs = wf.readWikipedia(url);
         index.indexPage(url, paragraphs);
+
+        url = "https://en.wikipedia.org/wiki/Citrix_Systems";
+        paragraphs = wf.readWikipedia(url);
+        index.indexPage(url, paragraphs);
+
     }
 }
