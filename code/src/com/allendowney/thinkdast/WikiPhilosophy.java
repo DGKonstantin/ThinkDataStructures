@@ -101,7 +101,7 @@ public class WikiPhilosophy {
                         if (((TextNode) node).getWholeText().contains(")")) isQuotes = false;
                     }
                     if(isLink && isWiki && !isRef && !isCursive && !isRepeat && !isSmall && !isQuotes){
-                        System.out.println(node.absUrl("href"));
+                        System.out.printf("\"%s\", \n", node.absUrl("href"));
                         return node.absUrl("href");
                     }
                 }

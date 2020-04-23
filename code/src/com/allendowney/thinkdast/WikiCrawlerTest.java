@@ -58,30 +58,33 @@ public class WikiCrawlerTest {
 	@Test
 	public void testCrawl() throws IOException {
 		String url1 = "https://en.wikipedia.org/wiki/Java_(programming_language)";
-		String url2 = "https://en.wikipedia.org/wiki/Programming_language";
-		String url3 = "https://en.wikipedia.org/wiki/Concurrent_computing";
+		String url2 = "https://en.wikipedia.org/wiki/General-purpose_language";
+		String url3 = "https://en.wikipedia.org/wiki/Programming_language";
 
 		String res = wc.crawl(true);
+		System.out.printf("url: %s, ress: %s\n", url1, res);
 		assertThat(url1.equals(res), is(true));
-		assertThat(wc.queueSize(), is(396));
+		assertThat(wc.queueSize(), is(414));
 
 		res = wc.crawl(true);
+		System.out.printf("url: %s, ress: %s\n", url2, res);
 		assertThat(url2.equals(res), is(true));
-		assertThat(wc.queueSize(), is(653));
+		assertThat(wc.queueSize(), is(416));
 
 		res = wc.crawl(true);
+		System.out.printf("url: %s, ress: %s\n", url3, res);
 		assertThat(url3.equals(res), is(true));
-		assertThat(wc.queueSize(), is(704));
+		assertThat(wc.queueSize(), is(693));
 
 		Map<String, Integer> map = index.getCounts("the");
 
 		int count = map.get(url1);
-		assertThat(count, is(339));
+		assertThat(count, is(253));
 
 		count = map.get(url2);
-		assertThat(count, is(264));
+		assertThat(count, is(2));
 
 		count = map.get(url3);
-		assertThat(count, is(53));
+		assertThat(count, is(272));
 	}
 }

@@ -16,7 +16,7 @@ import redis.clients.jedis.Transaction;
 public class JedisIndex {
 
     private Jedis jedis;
-
+    static int urlCount = 0;
     /**
      * Constructor.
      *
@@ -77,7 +77,15 @@ public class JedisIndex {
             t.hset(hashname, term, count.toString());
             t.sadd(urlSetKey(term), url);
         }
-        return t.exec();
+        List<Object> list = null;
+        try{
+            list = t.exec();
+        }catch (Exception e){
+            System.out.println(JedisIndex.urlCount);
+            throw e;
+        }
+        JedisIndex.urlCount++;
+        return list;
     }
 
     /**
@@ -96,15 +104,33 @@ public class JedisIndex {
      * @param term
      * @return Map from URL to count.
      */
-    public Map<String, Integer> getCounts(String term) {
-        Map <String, Integer> map = new HashMap<>();
+//    public Map<String, Integer> getCounts(String term) {
+//        HashMap <String, Integer> map = new HashMap<>();
+//        Set<String> urls = getURLs(term);
+//        Integer count;
+//        for(String url : urls){
+//            //System.out.printf("url: %s, term: %s\n", url, term);
+//            count = getCount(url, term);
+//            map.put(url, count);
+//        }
+//        return map;
+//    }
+
+    public Map<String, Integer> getCounts(String term){
         Set<String> urls = getURLs(term);
-        Integer count;
-        for(String url : urls){
-            count = getCount(url, term);
-            map.put(url, count);
+        Transaction t = jedis.multi();
+        for (String url : urls){
+            t.hget(termCounterKey(url), term);
         }
-        return map;
+
+        List<Object> list = t.exec();
+        Map <String, Integer> map = new HashMap<>();
+        int i = 0;
+        for (String url : urls){
+            Integer integer = new Integer((String) list.get(i++));
+            map.put(url, integer);
+        }
+    return map;
     }
 
     /**
@@ -250,13 +276,25 @@ public class JedisIndex {
         //index.deleteTermCounters();
         //index.deleteURLSets();
         //index.deleteAllKeys();
-        //loadIndex(index);
+        loadIndex(index);
 
 
         //index.printIndex();
-        Map<String, Integer> map = index.getCounts("the");
-        for (Entry<String, Integer> entry: map.entrySet()) {
-            System.out.println(entry.getKey() + "  " + entry.getValue());
+        String terms = "java, the, a, not";
+        for (String term : terms.split(",")){
+            term = term.trim();
+            Integer count = 0;
+            Date start = new Date();
+            Map<String, Integer> map = index.getCounts(term);
+            for (Entry<String, Integer> entry: map.entrySet()) {
+                count += entry.getValue();
+            }
+            Date finish = new Date();
+            System.out.printf("Exec time for %s: %d, Count = %d\n", term, finish.getTime() - start.getTime(), count);
+//            Exec time for java: 602, Count = 160
+//            Exec time for the: 2491, Count = 2972
+//            Exec time for a: 2660, Count = 1116
+//            Exec time for not: 2284, Count = 201
         }
     }
 
@@ -269,17 +307,45 @@ public class JedisIndex {
     private static void loadIndex(JedisIndex index) throws IOException {
         WikiFetcher wf = new WikiFetcher();
 
-        String url = "https://en.wikipedia.org/wiki/Java_(programming_language)";
-        Elements paragraphs = wf.readWikipedia(url);
-        index.indexPage(url, paragraphs);
+        String[] urls = new String[]{"https://en.wikipedia.org/wiki/County_seat",
+                "https://en.wikipedia.org/wiki/Administrative_center",
+                "https://en.wikipedia.org/wiki/Local_government",
+                "https://en.wikipedia.org/wiki/Public_administration",
+                "https://en.wikipedia.org/wiki/Public_policy",
+                "https://en.wikipedia.org/wiki/Wikipedia:Citation_needed",
+                "https://en.wikipedia.org/wiki/Wikipedia:Verifiability",
+                "https://en.wikipedia.org/wiki/Wikipedia",
+                "https://en.wikipedia.org/wiki/Help:Pronunciation_respelling_key",
+                "https://en.wikipedia.org/wiki/Pronunciation_respelling_for_English",
+                "https://en.wikipedia.org/wiki/Pronunciation_respelling",
+                "https://en.wikipedia.org/wiki/Ad_hoc",
+                "https://en.wikipedia.org/wiki/List_of_Latin_phrases",
+                "https://en.wikipedia.org/wiki/English_language",
+                "https://en.wikipedia.org/wiki/West_Germanic_language",
+                "https://en.wikipedia.org/wiki/Germanic_languages",
+                "https://en.wikipedia.org/wiki/Indo-European_languages",
+                "https://en.wikipedia.org/wiki/Language_family",
+                "https://en.wikipedia.org/wiki/Language",
+                "https://en.wikipedia.org/wiki/Grammar",
+                "https://en.wikipedia.org/wiki/Linguistics",
+                "https://en.wikipedia.org/wiki/Science",
+                "https://en.wikipedia.org/wiki/Knowledge",
+                "https://en.wikipedia.org/wiki/Fact",
+                "https://en.wikipedia.org/wiki/Reality",
+                "https://en.wikipedia.org/wiki/Object_of_the_mind",
+                "https://en.wikipedia.org/wiki/Mind",
+                "https://en.wikipedia.org/wiki/Intellect",
+                "https://en.wikipedia.org/wiki/Truth",
+                "https://en.wikipedia.org/wiki/Modernity",
+                "https://en.wikipedia.org/wiki/Norm_(social)"};
 
-        url = "https://en.wikipedia.org/wiki/Programming_language";
-        paragraphs = wf.readWikipedia(url);
-        index.indexPage(url, paragraphs);
+        Elements paragraphs = null;
 
-        url = "https://en.wikipedia.org/wiki/Citrix_Systems";
-        paragraphs = wf.readWikipedia(url);
-        index.indexPage(url, paragraphs);
+        for (String url : urls){
+            paragraphs = wf.readWikipedia(url);
+            index.indexPage(url, paragraphs);
+        }
+        System.out.println(urlCount);
 
     }
 }
