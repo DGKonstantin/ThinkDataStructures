@@ -1,12 +1,7 @@
 package com.allendowney.thinkdast;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import redis.clients.jedis.Jedis;
@@ -60,8 +55,16 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch or(WikiSearch that) {
-		// TODO: FILL THIS IN!
-		return null;
+		Map<String, Integer> map = new HashMap<>();
+		map.putAll(this.map);
+		for (String url : that.map.keySet()){
+			if (map.keySet().contains(url)){
+				map.put(url, map.get(url) + that.map.get(url));
+			}else {
+				map.put(url, that.map.get(url));
+			}
+		}
+		return new WikiSearch(map);
 	}
 
 	/**
@@ -71,8 +74,13 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch and(WikiSearch that) {
-		// TODO: FILL THIS IN!
-		return null;
+		Map<String, Integer> map = new HashMap<>();
+		for (String urlThat : that.map.keySet()){
+			for (String urlThis : this.map.keySet()){
+				if (urlThat.equals(urlThis)) map.put(urlThis, that.map.get(urlThat) + this.map.get(urlThat));
+			}
+		}
+		return new WikiSearch(map);
 	}
 
 	/**
@@ -82,8 +90,12 @@ public class WikiSearch {
 	 * @return New WikiSearch object.
 	 */
 	public WikiSearch minus(WikiSearch that) {
-		// TODO: FILL THIS IN!
-		return null;
+		Map<String, Integer> map = new HashMap<>();
+		map.putAll(this.map);
+		for (String url : that.map.keySet()){
+			if (map.containsKey(url)) map.remove(url);
+		}
+		return new WikiSearch(map);
 	}
 
 	/**
@@ -104,8 +116,11 @@ public class WikiSearch {
 	 * @return List of entries with URL and relevance.
 	 */
 	public List<Entry<String, Integer>> sort() {
-		// TODO: FILL THIS IN!
-		return null;
+		List <Entry<String, Integer>> list = new ArrayList<>();
+		for(String url : map.keySet()){
+			list.add(Map.entry(url, map.get(url)));
+		}
+		return list;
 	}
 
 
