@@ -120,8 +120,18 @@ public class WikiSearch {
 		for(String url : map.keySet()){
 			list.add(Map.entry(url, map.get(url)));
 		}
+		Collections.sort(list, comparator);
 		return list;
 	}
+
+	Comparator<Entry<String, Integer>> comparator = new Comparator<Entry<String, Integer>>() {
+        @Override
+        public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2) {
+            if (o1.getValue() > o2.getValue()) return -1;
+            if (o1.getValue() < o2.getValue()) return 1;
+            return 0;
+        }
+    };
 
 
 	/**

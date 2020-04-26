@@ -127,8 +127,11 @@ public class JedisIndex {
         Map <String, Integer> map = new HashMap<>();
         int i = 0;
         for (String url : urls){
+//            int countOfWordInUrl = getCountWordInUrl(url);
+            Double idf = idf(term);
             Integer integer = new Integer((String) list.get(i++));
-            map.put(url, integer);
+            Double aDouble = (integer * idf);
+            map.put(url, Math.toIntExact(Math.round(aDouble)));
         }
     return map;
     }
@@ -141,8 +144,28 @@ public class JedisIndex {
      * @return
      */
     public Integer getCount(String url, String term) {
+        //System.out.printf("url: %s, term: %s\n", url, term);
         return Integer.valueOf(jedis.hget(termCounterKey(url), term));
     }
+
+    private Double idf(String term){
+        Set<String> allUrlByTerm = jedis.smembers(urlSetKey(term));
+        Integer countOfTermInAllUrls = 0;
+        for (String url : allUrlByTerm){
+            countOfTermInAllUrls += getCount(url, term);
+        }
+        Double countOfTermInAllUrlsDouble = countOfTermInAllUrls.doubleValue();
+        Double countOfUrlsDouble = (double) allUrlByTerm.size();
+        System.out.printf("log: %f, countOfUrlsDouble: %f, countOfTermInAllUrlsDouble: %f\n", -Math.log10(countOfUrlsDouble / countOfTermInAllUrlsDouble),
+                countOfUrlsDouble, countOfTermInAllUrlsDouble);
+        return -Math.log10(countOfUrlsDouble / countOfTermInAllUrlsDouble);
+    }
+
+//    private Integer getCountWordInUrl(String url){
+//        Set<String> set = jedis.hkeys(termCounterKey(url));
+//        System.out.println(url + ": " + set.size());
+//        return set.size();
+//    }
 
     /**
      * Adds a page to the index.
